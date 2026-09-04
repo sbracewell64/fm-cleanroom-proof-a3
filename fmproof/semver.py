@@ -1,4 +1,4 @@
-"""SemVer 2.0.0 parsing.
+"""SemVer 2.0.0 parsing and version bumping.
 
 This module is deliberately strict. It accepts exactly the grammar in the
 SemVer 2.0.0 specification for a version *core* plus an optional pre-release,

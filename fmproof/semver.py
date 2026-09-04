@@ -1,4 +1,4 @@
-"""SemVer 2.0.0 parsing.
+"""SemVer 2.0.0 parsing and version bumping.
 
 This module is deliberately strict. It accepts exactly the grammar in the
 SemVer 2.0.0 specification for a version *core* plus an optional pre-release,
@@ -16,7 +16,7 @@ from __future__ import annotations
 import re
 from typing import NamedTuple, Tuple
 
-__all__ = ["Version", "InvalidVersionError", "parse"]
+__all__ = ["Version", "InvalidVersionError", "parse", "bump"]
 
 # A numeric identifier is 0, or a non-zero digit followed by digits: no leading
 # zeroes (SemVer 2.0.0 section 9).
@@ -94,3 +94,38 @@ def parse(version: str) -> Version:
         patch=int(match.group("patch")),
         prerelease=tuple(prerelease.split(".")) if prerelease else (),
     )
+
+
+_BUMP_PARTS = ("major", "minor", "patch")
+
+
+def bump(version: str, part: str) -> str:
+    """Return ``version`` with ``part`` incremented and the lower parts reset.
+
+    ``part`` is one of ``"major"``, ``"minor"`` or ``"patch"``. Bumping a part
+    increments that part, resets every less-significant core part to ``0``, and
+    drops any pre-release: the bumped release core has higher precedence than any
+    pre-release of it (SemVer 2.0.0 section 11.3) and the result names that
+    release. The returned string is the canonical rendering of the bumped
+    :class:`Version`.
+
+    A ``version`` that :func:`parse` rejects raises :class:`InvalidVersionError`
+    - the same error :func:`parse` raises - rather than being bumped on a guess.
+    An unrecognised ``part`` raises :class:`ValueError` naming the offending
+    value.
+
+    Bumping *within* a pre-release sequence - incrementing ``1.0.0-rc.1`` to
+    ``1.0.0-rc.2``, or finalising a pre-release to its release core rather than
+    advancing the patch - is a separate, reversible design question, and it is
+    deliberately not decided here.
+    """
+    current = parse(version)
+    if part == "major":
+        bumped = Version(current.major + 1, 0, 0)
+    elif part == "minor":
+        bumped = Version(current.major, current.minor + 1, 0)
+    elif part == "patch":
+        bumped = Version(current.major, current.minor, current.patch + 1)
+    else:
+        raise ValueError(f"unrecognised part: {part!r}; expected one of {_BUMP_PARTS}")
+    return str(bumped)

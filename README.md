@@ -18,7 +18,7 @@ content is a vehicle: the proof is about the path, not the parser.
 
 | Path | What it is |
 |---|---|
-| `fmproof/semver.py` | SemVer 2.0.0 parsing, and version precedence comparison |
+| `fmproof/semver.py` | SemVer 2.0.0 parsing, version precedence comparison, and version bumping |
 | `tests/` | `unittest` suite, run by both CI and the pipeline's test step |
 | `.no-mistakes.yaml` | pipeline commands, read only from the trusted default-branch copy |
 | `.github/workflows/ci.yml` | the `test` required status check |
